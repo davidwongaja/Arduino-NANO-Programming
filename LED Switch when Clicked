@@ -1,0 +1,78 @@
+const int buttonPin = 2;
+const int rLEDPin = 3;
+const int gLEDPin = 4; 
+const int bLEDPin = 5;
+
+int buttonState = 0;
+int ledcolor = 0;
+
+bool ButtonPressed = false;
+
+void setup() {
+   pinMode(rLEDPin, OUTPUT);
+   pinMode(gLEDPin, OUTPUT);
+   pinMode(bLEDPin, OUTPUT);
+   pinMode(buttonPin, INPUT);
+}
+
+void loop() {
+  buttonState = digitalRead(buttonPin);
+
+  if(buttonState == HIGH && !ButtonPressed) {
+    ledcolor = ledcolor + 1;
+    ButtonPressed = true;
+    //delay(100);
+  }
+  if(buttonState == LOW && ButtonPressed){
+    ButtonPressed = false;
+  }
+  if (ledcolor == 0){
+    digitalWrite(rLEDPin, HIGH);
+    digitalWrite(gLEDPin, HIGH);
+    digitalWrite(bLEDPin, HIGH);
+  }
+  // RED
+  else if (ledcolor == 1) {
+    digitalWrite(rLEDPin, LOW);
+    digitalWrite(gLEDPin, HIGH);
+    digitalWrite(bLEDPin, HIGH);
+  }
+  // GREEN
+  else if (ledcolor == 2) {
+    digitalWrite(rLEDPin, HIGH);
+    digitalWrite(gLEDPin, LOW);
+    digitalWrite(bLEDPin, HIGH);
+  }
+  // BLUE
+  else if (ledcolor == 3) {
+    digitalWrite(rLEDPin, HIGH);
+    digitalWrite(gLEDPin, HIGH);
+    digitalWrite(bLEDPin, LOW);
+  }
+  else if (ledcolor == 4) {
+    digitalWrite(rLEDPin, LOW);
+    digitalWrite(gLEDPin, LOW);
+    digitalWrite(bLEDPin, HIGH);
+  }
+  // PURPLE
+  else if (ledcolor == 5) {
+    digitalWrite(rLEDPin, LOW);
+    digitalWrite(gLEDPin, HIGH);
+    digitalWrite(bLEDPin, LOW);
+  }
+  // CYAN
+  else if (ledcolor == 6) {
+    digitalWrite(rLEDPin, HIGH);
+    digitalWrite(gLEDPin, LOW);
+    digitalWrite(bLEDPin, LOW);
+  }
+  // WHITE
+  else if (ledcolor == 7) {
+    digitalWrite(rLEDPin, LOW);
+    digitalWrite(gLEDPin, LOW);
+    digitalWrite(bLEDPin, LOW);
+  }
+  else if (ledcolor ==8){
+    ledcolor = 0;
+  }
+}
