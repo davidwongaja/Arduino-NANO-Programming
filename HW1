@@ -1,0 +1,79 @@
+const int buttonPin = 2;  
+const int redPin = 3;     
+const int bluePin = 4;    
+const int greenPin = 5;   
+
+int buttonState;
+int lastButtonState = HIGH;
+unsigned long lastDebounceTime = 0;
+unsigned long debounceDelay = 50; 
+
+int modeState = 0;
+
+void setup() {
+  pinMode(buttonPin, INPUT_PULLUP); 
+  pinMode(redPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  
+  allOff(); 
+}
+
+void loop() {
+  int reading = digitalRead(buttonPin);
+
+  if (reading != lastButtonState) {
+    lastDebounceTime = millis();
+  }
+
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+    if (reading != buttonState) {
+      buttonState = reading;
+
+      if (buttonState == LOW) {
+        modeState++; 
+        if (modeState > 3) {
+          modeState = 0; 
+        }
+      }
+    }
+  }
+
+  switch (modeState) {
+    case 0: 
+      allOff();
+      break;
+      
+    case 1: 
+      digitalWrite(greenPin, LOW);
+      digitalWrite(redPin, HIGH);
+      digitalWrite(bluePin, HIGH);
+      break;
+      
+    case 2: 
+      digitalWrite(redPin, LOW);
+      digitalWrite(greenPin, LOW);
+      digitalWrite(bluePin, HIGH);
+      break;
+      
+    case 3: 
+      digitalWrite(greenPin, LOW);
+      digitalWrite(redPin, HIGH);
+      digitalWrite(bluePin, HIGH);
+      delay(150);
+
+      digitalWrite(redPin, LOW);
+      digitalWrite(greenPin, LOW);
+      digitalWrite(bluePin, HIGH);
+      delay(150);
+      break;
+  }
+
+  lastButtonState = reading;
+}
+
+void allOff() {
+  digitalWrite(redPin, HIGH);
+  digitalWrite(bluePin, HIGH);
+  digitalWrite(greenPin, HIGH);
+}
