@@ -1,0 +1,147 @@
+const int buttonPin = 2;
+const int redPin    = 3;
+const int bluePin   = 4;
+const int greenPin  = 5;
+
+int currentMode  = 0;
+int colorIndex   = 0;
+
+bool lastButtonState = HIGH;
+unsigned long buttonPressTime = 0;
+const unsigned long longPressDuration = 800;
+bool longPressExecuted = false;
+
+unsigned long previousBlinkMillis    = 0;
+unsigned long previousBreatheMillis  = 0;
+unsigned long previousRainbowMillis  = 0;
+
+bool blinkState = true;
+int breatheBrightness = 0;
+int breatheFadeAmount = 5;
+int rainbowHue = 0;
+
+const int totalColors = 7;
+const int colors[totalColors][3] = {
+  {255, 0, 0},
+  {0, 255, 0},
+  {0, 0, 255},
+  {255, 255, 0},
+  {0, 255, 255},
+  {255, 0, 255},
+  {255, 255, 255}
+};
+
+void setup() {
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+  int buttonState = digitalRead(buttonPin);
+
+  if (buttonState == LOW && lastButtonState == HIGH) {
+    buttonPressTime = currentMillis;
+    longPressExecuted = false;
+    delay(20);
+  } 
+  else if (buttonState == LOW && !longPressExecuted) {
+    if (currentMillis - buttonPressTime >= longPressDuration) {
+      currentMode = (currentMode + 1) % 4;
+      longPressExecuted = true;
+      resetModeStates();
+    }
+  } 
+  else if (buttonState == HIGH && lastButtonState == LOW) {
+    if (!longPressExecuted) {
+      colorIndex = (colorIndex + 1) % totalColors;
+      resetModeStates();
+    }
+    delay(20);
+  }
+
+  lastButtonState = buttonState;
+
+  switch (currentMode) {
+    case 0:
+      setRGBColor(colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]);
+      break;
+
+    case 1:
+      if (currentMillis - previousBlinkMillis >= 500) {
+        previousBlinkMillis = currentMillis;
+        blinkState = !blinkState;
+      }
+      
+      if (blinkState) {
+        setRGBColor(colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]);
+      } else {
+        turnOffRGB();
+      }
+      break;
+
+    case 2:
+      if (currentMillis - previousBreatheMillis >= 25) {
+        previousBreatheMillis = currentMillis;
+        
+        breatheBrightness += breatheFadeAmount;
+        if (breatheBrightness <= 0 || breatheBrightness >= 255) {
+          breatheFadeAmount = -breatheFadeAmount;
+        }
+      }
+      
+      setRGBColor(
+        (colors[colorIndex][0] * breatheBrightness) / 255,
+        (colors[colorIndex][1] * breatheBrightness) / 255,
+        (colors[colorIndex][2] * breatheBrightness) / 255
+      );
+      break;
+
+    case 3:
+      if (currentMillis - previousRainbowMillis >= 10) {
+        previousRainbowMillis = currentMillis;
+        rainbowHue = (rainbowHue + 1) % 768;
+      }
+      
+      showRainbowColor(rainbowHue);
+      break;
+  }
+}
+
+void resetModeStates() {
+  blinkState = true;
+  breatheBrightness = 0;
+  breatheFadeAmount = 5;
+  previousBlinkMillis = millis();
+  previousBreatheMillis = millis();
+}
+
+void setRGBColor(int red, int green, int blue) {
+  analogWrite(redPin, 255 - red);
+  analogWrite(greenPin, 255 - green);
+  analogWrite(bluePin, 255 - blue);
+}
+
+void turnOffRGB() {
+  setRGBColor(0, 0, 0);
+}
+
+void showRainbowColor(int hue) {
+  int r, g, b;
+  if (hue < 256) {
+    r = 255 - hue;
+    g = hue;
+    b = 0;
+  } else if (hue < 512) {
+    r = 0;
+    g = 255 - (hue - 256);
+    b = hue - 256;
+  } else {
+    r = hue - 512;
+    g = 0;
+    b = 255 - (hue - 512);
+  }
+  setRGBColor(r, g, b);
+}
